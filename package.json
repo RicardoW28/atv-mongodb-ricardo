@@ -1,0 +1,30 @@
+{
+  "name": "chat_mongodb_mysql",
+  "version": "1.0.0",
+  "description": "web chat with mongo db",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js" 
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/victtini/Chat_MongoDB_mysql.git"
+  },
+  "keywords": [
+    "hello"
+  ],
+  "author": "victor santana",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/victtini/Chat_MongoDB_mysql/issues"
+  },
+  "homepage": "https://github.com/victtini/Chat_MongoDB_mysql#readme",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
