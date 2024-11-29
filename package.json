@@ -1,19 +1,12 @@
 {
   "name": "chat_mongodb_mysql",
   "version": "1.0.0",
-  "description": "web chat with mongo db",
+  "description": "365 \r qualquer coisa estatica vai parar na public",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js" 
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/victtini/Chat_MongoDB_mysql.git"
-  },
-  "keywords": [
-    "hello"
-  ],
-  "author": "victor santana",
+  "author": "https://github.com/RicardoW28/atv-mongodb-ricardo",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/victtini/Chat_MongoDB_mysql/issues"
@@ -22,9 +15,8 @@
   "dependencies": {
     "ejs": "^3.1.10",
     "express": "^4.21.1",
+    "mongodb": "^6.11.0",
+    "mongoose": "^8.8.3",
     "socket.io": "^4.8.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.7"
   }
 }
