@@ -1,69 +1,124 @@
-// Importação dos pacotes
+INDEX.JS
+
+/* Importa o pacote do mongoose: */
+const mongoose = require('mongoose');
+/* 
+    Import dos pacotes: 
+        - express
+        - ejs
+        - http
+        - path
+        - socket.io
+
+*/
 const express = require('express');
 const ejs = require('ejs');
 const http = require('http');
 const path = require('path');
 const socketIO = require('socket.io');
-const mongoose = require('mongoose');
 
-// Instâncias
+/*
+    Instancias:
+        - express
+        - server
+        - socket.io
+*/
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
 
-// Conexão com o MongoDB
-mongoose.connect('mongodb+srv://rrwinchester2003:inpIjMAvi7zyYtyY@cluster0.pfm7g.mongodb.net/meuBancoDeDados?retryWrites=true&w=majority')
-    .then(() => console.log("Conectado ao MongoDB com sucesso!"))
-    .catch(err => console.error("Erro ao conectar ao MongoDB:", err));
-
-// Definindo a localização da pasta estática
+/*
+    Define a localização da pasta estática:
+*/
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Definindo o EJS como motor de visualização
+
+/*
+    Define o EJS como a engine de rendereização frontend:
+*/
 app.set('views', path.join(__dirname, 'public'));
 app.engine('html', ejs.renderFile);
 
-// Rota principal
-app.get('/', (req, res) => {
+/*
+    Rota raiz '/' para acessar o index.html da aplicação:
+*/
+app.use('/', (req, res)=>{
     res.render('index.html');
 });
 
-// Cria conexão com o socket.io
-io.on('connection', socket => {
-    console.log('Novo usuário conectado. ID: ' + socket.id);
-});
+/*Conexão com o MongoDB: */
+function connectDB() {
 
-// Criação do servidor HTTP
-server.listen(3000, () => {
-    console.log('Servidor funcionando em http://localhost:3000');
-});
 
-// Definição do esquema e modelo do MongoDB
-const mensagemSchema = new mongoose.Schema({
-    data_hora: Date,
-    mensagem: String,
-    contato: String
-});
+    /* URL de conexão com o Atlas mongoDB: */
+    let dbUrl = 'mongodb+srv://danieldsousa76:<SENHA>9@cluster0.eyq0rpz.mongodb.net/';
 
-const Mensagem = mongoose.model('Mensagem', mensagemSchema);
+    mongoose.connect(dbUrl);
+    mongoose.connection.on('error', console.error.bind(console, 'connection error:'));
+    mongoose.connection.once('open', function callback(){
+        console.log("Atlas mongoDB conectado!");
+    });
 
-// Funções para listar e procurar mensagens
-async function listarMensagensOrdemEnvio() {
-    const mensagensOrdenadas = await Mensagem.find().sort({ data_hora: 1 });
-    console.log(mensagensOrdenadas);
 }
 
-async function listarMensagensOrdemInversa() {
-    const mensagensInversas = await Mensagem.find().sort({ data_hora: -1 });
-    console.log(mensagensInversas);
-}
+/* Chama a função de conexão com o banco de dados */
+connectDB();
 
-async function procurarMensagemPorTrecho(trecho) {
-    const resultado = await Mensagem.find({ mensagem: new RegExp(trecho, 'i') });
-    console.log(resultado);
-}
 
-// Exemplos de uso das funções (descomente para testar)
-// listarMensagensOrdemEnvio();
-// listarMensagensOrdemInversa();
-// procurarMensagemPorTrecho("projeto");
+
+/* Define o model */
+let Message = mongoose.model('Message',{ usuario : String, data_hora : String, message : String});
+
+/* INICIO DO CÓDIGO DO CHAT */
+
+/* Array que armazena as as mensagens */
+let messages = [];
+
+/*Recupera as mensagens do banco de dados: */
+Message.find({})
+    .then(docs=>{
+        console.log('DOCS: ' + docs);
+        messages = docs;
+        console.log('MESSAGES: ' + messages);
+    }).catch(err=>{
+        console.log(err);
+    });
+
+/* Cria uma conexão com o socketIO que será usada pela aplicação de chat: */
+io.on('connection', socket=>{
+
+    /* Exibe a título de teste da conexão o id do socket do usuário conectado: */
+    console.log(`Novo usuário conectado ${socket.id}`);
+
+    /* Recupera e mantem as mensagens do front para back e vice-versa: */
+    socket.emit('previousMessage', messages);
+
+    /* Dispara ações quando recebe mensagens do frontend: */
+    socket.on('sendMessage', data => {
+
+    /* Adicona uma mensagem enviada no final do array de mensagens: */
+    // messages.push(data);
+    let message = new Message(data);
+    message.save()
+        .then(
+            socket.broadcast.emit('receivedMessage', data)
+        )
+        .catch(err=>{
+            console.log('ERRO: ' + err);
+        });
+
+    /* Propaga a mensagem enviada para todos os usuário conectados na aplicaçao de chat: */
+    // socket.broadcast.emit('receivedMessage', data);
+
+    });
+
+})
+
+/* FIM DO CÓDIGO DO CHAT */
+
+/*
+    Criação servidor http:
+*/
+server.listen(3000, ()=>{
+    console.log('Servidor do web chat rodando em -> http://localhost:3000');
+});
